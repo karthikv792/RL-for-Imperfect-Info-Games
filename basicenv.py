@@ -7,7 +7,7 @@ import os
 import math
 from copy import deepcopy
 import pygame
-
+import itertools
 
 class Board():
     def __init__(self, logging=False):
@@ -24,7 +24,7 @@ class Board():
                                 ['KC', '8S', '10C', 'QC', 'KC', 'AC', 'AD', 'KD', '4H', '4D'],
                                 ['AC', '7S', '6S', '5S', '4S', '3S', '2S', '2H', '3H', '5D'],
                                 ['', 'AD', 'KD', 'QD', '10D', '9D', '8D', '7D', '6D', '']]
-        self.board_pics = {}
+
         self.red_coin = (self.coin_size, 1)
         self.blue_coin = (self.coin_size, 2)
         self.coin_positions = [[0] * 10 for _ in range(10)]
@@ -32,8 +32,7 @@ class Board():
         # self.coin_positions[0][0],self.coin_positions[9][0],self.coin_positions[0][9],self.coin_positions[9][9],=3,3,3,3
         # self.initialize_board()
 
-    def visualize(self):
-        self.screen = pygame.display.set_mode([self.board_size, self.board_size])
+
 
     def get_legal_moves(self, player):
         legal_moves = []
@@ -44,17 +43,19 @@ class Board():
                 if self.coin_positions[ind_row][ind_col] == 0:
                     if col in player.cards_at_hand:
                         legal_moves.append(((ind_row, ind_col),
-                                            '0pos'))  # Will yield all positions where the player has cards to put
+                                            '0pos')) # Will yield all positions where the player has cards to put
                         # the token
                     else:
-                        if len([x for x in player.cards_at_hand if 'J2' in x]):
+                        j2s = [x for x in player.cards_at_hand if 'J2' in x]
+                        if len(j2s):
                             legal_moves.append(((ind_row, ind_col),
                                                 '0posJ2'))  # Will yield all positions where the player needs J2 to
                             # put the token
                 else:
                     if self.board_positions[ind_row][ind_col] != '' and self.coin_positions[ind_row][ind_col] != \
                             player.team[1]:
-                        if len([x for x in player.cards_at_hand if 'J1' in x]):
+                        j1s = [x for x in player.cards_at_hand if 'J1' in x]
+                        if len(j1s):
                             legal_moves.append(((ind_row, ind_col), '1pos'))
         return legal_moves
 
@@ -130,9 +131,11 @@ class Board():
         return False
 
     def execute_move(self, player, move):
+        card = None
         if move[1] == '0pos':
             self.coin_positions[move[0][0]][move[0][1]] = player.team[1]
-            player.cards_at_hand.remove(self.board_positions[move[0][0]][move[0][1]])
+            card = self.board_positions[move[0][0]][move[0][1]]
+            player.cards_at_hand.remove(card)
             # key = (self.board_positions[move[0][0]][move[0][1]], move[0][0],move[0][1])
             # x_value, y_value = self.board_pics[key][1]
             if self.logging:
@@ -142,7 +145,8 @@ class Board():
             # pygame.display.update()
         if move[1] == '1pos':
             self.coin_positions[move[0][0]][move[0][1]] = 0
-            player.cards_at_hand.remove([x for x in player.cards_at_hand if 'J1' in x][0])
+            card  = [x for x in player.cards_at_hand if 'J1' in x][0]
+            player.cards_at_hand.remove(card)
             # key = (self.board_positions[c_row][c_col], c_row, c_col)
             # (pic, (x_value, y_value)) = self.board_pics[key]
             if self.logging:
@@ -152,7 +156,8 @@ class Board():
             # pygame.display.update()
         if move[1] == '0posJ2':
             self.coin_positions[move[0][0]][move[0][1]] = player.team[1]
-            player.cards_at_hand.remove([x for x in player.cards_at_hand if 'J2' in x][0])
+            card = [x for x in player.cards_at_hand if 'J2' in x][0]
+            player.cards_at_hand.remove(card)
             # key = (self.board_positions[move[0][0]][move[0][1]], move[0][0],move[0][1])
             # x_value, y_value = self.board_pics[key][1]
             if self.logging:
@@ -161,7 +166,7 @@ class Board():
             # self.screen.blit(self.get_coin_picture(player.team),
             #                   (x_value + self.coin_size[0] / 2, y_value + self.coin_size[1] / 2))
             # pygame.display.update()
-
+        return card
 
 class Deck():
     def __init__(self):
@@ -181,10 +186,10 @@ class Deck():
 
 
 class Player():
-    def __init__(self, id, team):
+    def __init__(self, id, team, cards_at_hand = []):
         self.name = 'Random Player ' + str(id)
         self.id = id
-        self.cards_at_hand = []
+        self.cards_at_hand = cards_at_hand
         self.team = team
         self.no_of_sequences = []
 
@@ -201,16 +206,18 @@ player 1 will play
 
 
 class Env():
-    def __init__(self, players, logging=False):
-        self.board = Board(logging)
+    def __init__(self, players, logging=False,sim=False):
+        self.board = Board(False)
         self.logging = logging
         self.players = players
         self.deck = Deck()
         self.discarded_cards = []
-        self.no_of_cards = 7
+        self.no_of_cards = 5
         self.action_space = []
         self.observation_space = []
-        self.split_cards()
+        self.board_pics = {}
+        if not sim:
+            self.split_cards()
 
     def step(self, player, action, game_over=False):
         """
@@ -221,16 +228,18 @@ class Env():
         """
         if game_over:
             return self.board.coin_positions, -1, True, {}
-        self.board.execute_move(player, action)
-        self.discarded_cards.append(self.board.board_positions[action[0][0]][action[0][1]])
+        card = self.board.execute_move(player, action)
+        self.discarded_cards.append(card)
         try:
             player.cards_at_hand.append(self.deck.card_deck.pop(0))
+            # print("Appended card to player's hand")
         except IndexError:
             if self.logging:
                 print("Reshuffling discarded cards in deck")
                 print(self.discarded_cards)
             self.deck.card_deck = self.discarded_cards.copy()
             random.shuffle(self.deck.card_deck)
+            self.discarded_cards = []
             player.cards_at_hand.append(self.deck.card_deck.pop(0))
         done = self.board.is_win(player)
         if done:
@@ -261,8 +270,8 @@ class Env():
         else:
             return pygame.transform.scale(pygame.image.load('coins/blue.png').convert_alpha(), team[0])
 
-    def display_board(self):
-        self.board.visualize()
+    def display_board(self, title='winning.jpg'):
+        self.screen = pygame.display.set_mode([self.board.board_size, self.board.board_size])
         for i in range(10):
             for j in range(10):
                 if (self.board.board_positions[i][j] != ''):
@@ -271,22 +280,36 @@ class Env():
                     # print(pic.get_rect())
                     x_value = j * self.board.board_size / 10
                     y_value = i * self.board.board_size / 10
-                    self.board.board_pics[(self.board.board_positions[i][j], i, j)] = [pic, (x_value, y_value)]
-                    self.board.screen.blit(pic, (x_value, y_value))
+                    self.board_pics[(self.board.board_positions[i][j], i, j)] = [pic, (x_value, y_value)]
+                    self.screen.blit(pic, (x_value, y_value))
                     # self.board.screen.blit(coin_pic,(x_value+self.board.coin_size[0]/2,y_value+self.board.coin_size[1]/2))
                     # self.board.screen.blit(coin_pic,(x_value,y_value))
                     if self.board.coin_positions[i][j] != 0:
                         key = (self.board.board_positions[i][j], i, j)
-                        x_value, y_value = self.board.board_pics[key][1]
+                        x_value, y_value = self.board_pics[key][1]
                         # print("Putting (with J2) on ", self.board_positions[i][j])
                         if self.board.coin_positions[i][j] == 1:
                             team = self.board.red_coin
                         else:
                             team = self.board.blue_coin
-                        self.board.screen.blit(self.get_coin_picture(team),
+                        self.screen.blit(self.get_coin_picture(team),
                                           (x_value + self.board.coin_size[0] / 2, y_value + self.board.coin_size[1] / 2))
                         pygame.display.update()
-        pygame.image.save(self.board.screen, "winning.jpg")
+        pygame.image.save(self.screen, title)
+
+    def get_belief_state(self, player):
+        curr_player_hand = player.cards_at_hand
+        cards_for_opponent = []
+        # from self.deck.card_deck create all combinations of 5 cards
+        for i in itertools.combinations(self.deck.card_deck, self.no_of_cards):
+            cards_for_opponent.append(i)
+        print(len(cards_for_opponent))
+        belief_states = []
+        for i in cards_for_opponent:
+            opponent_id = (player.id % 2) + 1
+            belief_states.append((self.board, curr_player_hand, i))
+
+        return belief_states
 
 
 # A simulator for the game
