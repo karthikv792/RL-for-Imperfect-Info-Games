@@ -2,7 +2,7 @@ import numpy as np
 from tqdm import tqdm
 import sys
 import os
-sys.path.append('../../')
+sys.path.append('../../../../')
 
 import argparse
 import torch

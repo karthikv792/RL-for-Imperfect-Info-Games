@@ -1,6 +1,9 @@
 #
-from basicenv import *
-from agent import *
+from Sequence import Env
+from agents.RandomAgent import *
+from agents.BasePolicyAgent import *
+from agents.NeuralNetworkAgent import *
+
 from matplotlib import pyplot as plt
 
 total_wins_of_neural_net = []
