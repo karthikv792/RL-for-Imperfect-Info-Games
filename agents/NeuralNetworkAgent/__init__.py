@@ -8,7 +8,7 @@ from agents.NeuralNetworkAgent.neuralnet import NeuralNet
 from agents.BasePolicyAgent import BasePolicyAgent
 from agents.BasePlayer import Player
 from Sequence import Env
-class BeliefStateGenerator:
+class BeliefStateSampler:
     def __init__(self, board, discarded_cards, curr_player_hand, sampling_no):
         self.board = board
         self.discarded_cards = discarded_cards
@@ -69,18 +69,19 @@ class NeuralNetPlayer(Player):
         """
         if self.train:
             print("------------------------------Generating new belief states--------------------------------")
-            belief_state_generator = BeliefStateGenerator(deepcopy(board), discarded_cards, deepcopy(self.cards_at_hand), self.sampling_number)
-            belief_states = belief_state_generator.create_belief_state()
+            belief_state_sampler = BeliefStateSampler(deepcopy(board), discarded_cards, deepcopy(self.cards_at_hand), self.sampling_number)
+            belief_states = belief_state_sampler.create_belief_state()
             try:
                 self.nn.load(filename='temp.pth.tar')
+                initial = False
             except:
                 print('No model found')
-            initial = True
+                initial = True
             for belief_state in belief_states:
                 print("------------------------------Iteration: ", belief_states.index(belief_state))
                 simulator = Simulator(deepcopy(belief_state), deepcopy(discarded_cards), initial=initial)
                 # self.training_samples.append()
-                examples, _ = simulator.simulate()
+                examples, player_rewards = simulator.simulate()
                 self.training_samples+=examples
                 if len(self.training_samples) > self.nn.nnet.batch_size:
                     if len(self.training_samples) > self.nn.nnet.batch_size*2:
@@ -89,6 +90,8 @@ class NeuralNetPlayer(Player):
                     self.nn.train(self.training_samples)
                     self.nn.save(filename='temp.pth.tar')
                     initial = False
+            # Previous model load - best
+            # if prev model wins
             self.nn.save(filename='best.pth.tar')
 
             return self.get_move_from_nn(board, discarded_cards)
@@ -98,9 +101,9 @@ class NeuralNetPlayer(Player):
 
 
     def get_move_from_nn(self, board, discarded_cards):
-        belief_state_generator2 = BeliefStateGenerator(deepcopy(board), discarded_cards, deepcopy(self.cards_at_hand),
+        belief_state_sampler2 = BeliefStateSampler(deepcopy(board), discarded_cards, deepcopy(self.cards_at_hand),
                                                       self.sampling_number)
-        belief_states2 = belief_state_generator2.create_belief_state()
+        belief_states2 = belief_state_sampler2.create_belief_state()
         moves_dict = {}
         for belief_state2 in belief_states2:
             simulator2 = Simulator(deepcopy(belief_state2), deepcopy(discarded_cards))
@@ -210,12 +213,13 @@ class Simulator():
         self.board = belief_state[0]
         self.deck = belief_state[1]
         self.initialplay = initial
-        self.opponent = BasePolicyAgent(2,(0,2))
+        self.opponent = NeuralNetPlayer(2,(0,2))
         self.opponent.cards_at_hand = deepcopy(belief_state[3])
         curr_player = NeuralNetPlayer(1,(0,1))
         curr_player.cards_at_hand = deepcopy(belief_state[2])
         if not self.initialplay:
             curr_player.nn.load(filename='temp.pth.tar')
+            self.opponent.nn.load(filename='temp.pth.tar')
         self.players = [curr_player, self.opponent]
         self.env = Env(self.players, logging=logging, sim=True)
         self.env.discarded_cards = discarded_cards
@@ -231,7 +235,7 @@ class Simulator():
             if ind == 0:
                 move = action
             else:
-                move = player.make_move(self.env.board)
+                move = player.make_move(self.env.board, self.env.discarded_cards)
             _, reward, done, info = self.env.step(player, move)
         return self.get_state(self.players[0], self.players[1])
 
@@ -244,37 +248,34 @@ class Simulator():
         while running:
             for ind, player in enumerate(self.players):
                 self.env.board.change_corners_for_win_check(player)
-                if ind == 0:
-                    state = self.get_state(player, self.players[(ind+1)%2])
-                    if not self.initialplay:
-                        pi, v = player.nn.predict(state)
-                        pi = player.validate_action(self.env.board, pi)
-                        #pick max action in pi
-                        action = np.argmax(pi)
-                        if action in [0,9,90,99,100,109,199,200,209,299]:
-                            print('Invalid move')
-                            move = player.make_move_basic(self.env.board)
-                            flag=1
-                        else:
-                            move = player.pi_to_moves(action)
-                            flag=2
-                        self.training_examples.append((state, ind, pi, None))
-                        print(move, flag)
-                        if move == None:
-                            print('Invalid move')
-                            print(player.get_legal_moves(self.env.board))
-
-                    else:
+                state = self.get_state(player, self.players[(ind+1)%2])
+                if not self.initialplay:
+                    pi, v = player.nn.predict(state)
+                    pi = player.validate_action(self.env.board, pi)
+                    #pick max action in pi
+                    action = np.argmax(pi)
+                    if action in [0,9,90,99,100,109,199,200,209,299]:
+                        print('Invalid move')
                         move = player.make_move_basic(self.env.board)
-                        # print("MOVE",move)
-                        #Convert move to pi
-                        pi_index = player.moves_to_pi_indices([move])
-                        pi = np.zeros(300)
-                        pi[pi_index] = 1
-                        self.training_examples.append((state, ind, pi, None))
+                        flag=1
+                    else:
+                        move = player.pi_to_moves(action)
+                        flag=2
+                    self.training_examples.append((state, ind, pi, None))
+                    # print(move, flag)
+                    if move == None:
+                        print('Invalid move')
+                        print(player.get_legal_moves(self.env.board))
 
                 else:
-                    move = player.make_move(self.env.board)
+                    move = player.make_move_basic(self.env.board)
+                    # print("MOVE",move)
+                    #Convert move to pi
+                    pi_index = player.moves_to_pi_indices([move])
+                    pi = np.zeros(300)
+                    pi[pi_index] = 1
+                    self.training_examples.append((state, ind, pi, None))
+
                 # print("PLAYER",ind,"MOVE",move)
                 _, reward, done, info = self.env.step(player, move)
                 # print("Recieved done",done)
@@ -288,7 +289,7 @@ class Simulator():
                         each_player_reward[(ind + 1) % no_players] = 0
                     break
         print("Reward",each_player_reward)
-        return [(x[0],x[2],each_player_reward[x[1]]) for x in self.training_examples], each_player_reward[0]
+        return [(x[0],x[2],each_player_reward[x[1]]) for x in self.training_examples], each_player_reward
     def get_state(self, player, opponent):
         """
         Get state of player

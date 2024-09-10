@@ -12,7 +12,7 @@ total_wins_of_neural_net = []
 def sequence(display=False, train=False, display_title="winning.jpg"):
     no_players = 2
     # players = [Player(i, (0, i)) for i in range(1, no_players+1)]
-    players = [NeuralNetPlayer(1, (0, 1),  train=train), BasePolicyAgent(2, (0, 2))]
+    players = [BasePolicyAgent(1, (0, 1)), BasePolicyAgent(2, (0, 2))]
     each_player_reward = [0 for i in range(no_players)]
     env = Env(players)
     running = True
@@ -103,7 +103,7 @@ def sequence2(display=False, train=False, display_title="winning.jpg"):
 
 wins = []
 for i in range(50):
-    winner, player_names = sequence(display=True, train=False)
+    winner, player_names = sequence2(display=True, train=True)
     wins.append(winner)
 # Count number of ones and twos in wins
 print(wins)
