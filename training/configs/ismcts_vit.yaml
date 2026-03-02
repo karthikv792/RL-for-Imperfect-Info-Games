@@ -1,0 +1,35 @@
+# training/configs/ismcts_vit.yaml
+model:
+  backbone: "google/vit-base-patch16-224"
+  freeze_backbone_epochs: 5
+  policy_hidden: 512
+  value_hidden: 256
+  num_input_channels: 22
+  target_size: 224
+
+mcts:
+  simulations: 400
+  cpuct: 1.5
+  determinizations: 30
+  dirichlet_alpha: 0.3
+  dirichlet_epsilon: 0.25
+
+training:
+  batch_size: 256
+  learning_rate: 0.001
+  weight_decay: 0.0001
+  epochs_per_iteration: 10
+  buffer_size: 500000
+
+self_play:
+  games_per_iteration: 100
+  parallel_workers: 8
+  max_moves: 500
+
+arena:
+  games: 100
+  promotion_threshold: 0.55
+
+monitoring:
+  wandb_project: "sequence-ai"
+  log_every_n_steps: 10
