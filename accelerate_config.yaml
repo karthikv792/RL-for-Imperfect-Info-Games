@@ -1,0 +1,6 @@
+# accelerate_config.yaml
+compute_environment: LOCAL_MACHINE
+distributed_type: "NO"
+mixed_precision: "no"
+num_processes: 1
+use_cpu: false
