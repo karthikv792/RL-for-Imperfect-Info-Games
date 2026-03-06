@@ -1,0 +1,30 @@
+# training/configs/rebel_deberta.yaml
+model:
+  backbone: "microsoft/deberta-v3-small"
+  freeze_backbone_epochs: 5
+  policy_hidden: 512
+  value_hidden: 256
+  seq_len: 317
+
+cfr:
+  iterations: 50
+  max_depth: 3
+
+training:
+  batch_size: 128
+  learning_rate: 0.0005
+  weight_decay: 0.0001
+  epochs_per_iteration: 10
+  buffer_size: 500000
+
+self_play:
+  games_per_iteration: 50
+  max_moves: 500
+
+arena:
+  games: 100
+  promotion_threshold: 0.55
+
+monitoring:
+  wandb_project: "sequence-ai"
+  log_every_n_steps: 10
