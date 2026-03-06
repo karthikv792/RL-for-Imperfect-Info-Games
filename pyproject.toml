@@ -23,10 +23,11 @@ dev = [
     "pytest-cov>=4.1",
     "pytest-benchmark>=4.0",
     "ruff>=0.1",
+    "httpx>=0.25",
 ]
 
 [tool.setuptools.packages.find]
-include = ["engine*", "agents*", "models*", "training*"]
+include = ["engine*", "agents*", "models*", "training*", "api*"]
 
 [tool.pytest.ini_options]
 testpaths = ["tests"]
