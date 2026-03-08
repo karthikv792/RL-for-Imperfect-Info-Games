@@ -4,11 +4,13 @@ from pydantic import BaseModel
 from api.game_session import GameSessionManager
 from api.leaderboard import LeaderboardManager
 from api.model_registry import ModelRegistry
+from api.replay_store import ReplayStore
 
 router = APIRouter()
 manager = GameSessionManager()
 leaderboard_manager = LeaderboardManager()
 model_registry = ModelRegistry()
+replay_store = ReplayStore()
 
 
 class CreateGameRequest(BaseModel):
@@ -65,6 +67,21 @@ def make_move(session_id: str, req: MakeMoveRequest):
         response["agent_move"] = agent_move
         response["state"] = session.to_dict()
     return response
+
+
+@router.get("/replays")
+def list_replays(agent: str | None = None, limit: int = 20):
+    """List game replays, optionally filtered by agent."""
+    return replay_store.list_replays(limit=limit, agent=agent)
+
+
+@router.get("/replays/{replay_id}")
+def get_replay(replay_id: str):
+    """Retrieve a specific game replay by ID."""
+    replay = replay_store.get_replay(replay_id)
+    if replay is None:
+        raise HTTPException(status_code=404, detail="Replay not found")
+    return replay
 
 
 @router.get("/models")
