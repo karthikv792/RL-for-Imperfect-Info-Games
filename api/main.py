@@ -2,7 +2,7 @@ from __future__ import annotations
 from fastapi import FastAPI, WebSocket
 from fastapi.middleware.cors import CORSMiddleware
 from api.routes.game import router as game_router, manager
-from api.ws_handler import handle_websocket
+from api.ws_handler import handle_websocket, spectator_manager
 
 app = FastAPI(title="Sequence AI", version="0.2.0")
 
@@ -20,3 +20,24 @@ app.include_router(game_router, prefix="/api")
 @app.websocket("/ws")
 async def websocket_endpoint(ws: WebSocket):
     await handle_websocket(ws, manager)
+
+
+@app.post("/api/spectate")
+def spectate_start(agent1: str = "random", agent2: str = "heuristic", seed: int | None = None):
+    try:
+        match_id = spectator_manager.start_match(agent1, agent2, seed=seed)
+        return {"match_id": match_id}
+    except ValueError as e:
+        from fastapi import HTTPException
+        raise HTTPException(status_code=400, detail=str(e))
+
+
+@app.post("/api/spectate/{match_id}/advance")
+def spectate_advance(match_id: str):
+    result = spectator_manager.advance_match(match_id)
+    return result
+
+
+@app.get("/api/spectate")
+def spectate_list():
+    return {"matches": spectator_manager.list_matches()}

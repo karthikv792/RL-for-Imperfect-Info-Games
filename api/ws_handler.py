@@ -2,8 +2,11 @@ from __future__ import annotations
 import json
 from fastapi import WebSocket, WebSocketDisconnect
 from api.game_session import GameSession, GameSessionManager, AVAILABLE_AGENTS
+from api.spectator import SpectatorManager
 from agents.random_agent import RandomAgent
 from agents.heuristic_agent import HeuristicAgent
+
+spectator_manager = SpectatorManager()
 
 
 async def handle_websocket(ws: WebSocket, manager: GameSessionManager):
@@ -72,6 +75,37 @@ async def handle_websocket(ws: WebSocket, manager: GameSessionManager):
                             "type": "game_state",
                             **session.to_dict(),
                         })
+
+            elif msg_type == "spectate_start":
+                agent1 = msg.get("agent1", "random")
+                agent2 = msg.get("agent2", "heuristic")
+                seed = msg.get("seed")
+                try:
+                    match_id = spectator_manager.start_match(agent1, agent2, seed=seed)
+                    await ws.send_json({
+                        "type": "spectate_started",
+                        "match_id": match_id,
+                    })
+                except ValueError as e:
+                    await ws.send_json({"type": "error", "message": str(e)})
+
+            elif msg_type == "spectate_advance":
+                match_id = msg.get("match_id")
+                if not match_id:
+                    await ws.send_json({"type": "error", "message": "match_id required"})
+                    continue
+                result = spectator_manager.advance_match(match_id)
+                await ws.send_json({
+                    "type": "spectate_update",
+                    **result,
+                })
+
+            elif msg_type == "spectate_list":
+                matches = spectator_manager.list_matches()
+                await ws.send_json({
+                    "type": "spectate_matches",
+                    "matches": matches,
+                })
 
             else:
                 await ws.send_json({
