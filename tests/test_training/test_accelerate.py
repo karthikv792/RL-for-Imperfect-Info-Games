@@ -1,6 +1,4 @@
 import numpy as np
-import pytest
-import torch
 from training.accelerate_trainer import AccelerateTrainer, AccelerateConfig
 
 

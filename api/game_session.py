@@ -3,7 +3,7 @@ import time
 import uuid
 from engine.game_state import GameState
 from engine.actions import Action, ActionType
-from engine.board import BOARD_LAYOUT, Occupant
+from engine.board import BOARD_LAYOUT
 from agents.base import Agent
 from agents.random_agent import RandomAgent
 from agents.heuristic_agent import HeuristicAgent

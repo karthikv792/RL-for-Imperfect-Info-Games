@@ -1,5 +1,4 @@
 import numpy as np
-import pytest
 from engine.game_state import GameState
 from models.board_tokenizer import BoardTokenizer
 

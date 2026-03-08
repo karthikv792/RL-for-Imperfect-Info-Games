@@ -1,10 +1,8 @@
 from __future__ import annotations
 import json
 from fastapi import WebSocket, WebSocketDisconnect
-from api.game_session import GameSession, GameSessionManager, AVAILABLE_AGENTS
+from api.game_session import GameSession, GameSessionManager
 from api.spectator import SpectatorManager
-from agents.random_agent import RandomAgent
-from agents.heuristic_agent import HeuristicAgent
 
 spectator_manager = SpectatorManager()
 

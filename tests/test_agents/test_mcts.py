@@ -1,6 +1,5 @@
 # tests/test_agents/test_mcts.py
 import numpy as np
-import pytest
 from engine.game_state import GameState
 from agents.ismcts.mcts import MCTSNode, mcts_search
 

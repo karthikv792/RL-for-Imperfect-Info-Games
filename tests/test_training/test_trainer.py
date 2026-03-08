@@ -1,7 +1,5 @@
 # tests/test_training/test_trainer.py
 import numpy as np
-import pytest
-import torch
 from training.trainer import SequenceTrainer, TrainingConfig
 
 

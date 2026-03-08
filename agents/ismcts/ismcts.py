@@ -1,8 +1,6 @@
 # agents/ismcts/ismcts.py
 from __future__ import annotations
 import random
-from typing import Callable
-import numpy as np
 from engine.game_state import GameState, InformationSet
 from engine.actions import Action, action_to_index
 from engine.board import BOARD_LAYOUT, Occupant

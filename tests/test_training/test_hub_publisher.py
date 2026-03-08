@@ -1,5 +1,4 @@
 # tests/test_training/test_hub_publisher.py
-import pytest
 from training.hub_publisher import create_model_card
 
 

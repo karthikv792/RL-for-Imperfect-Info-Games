@@ -40,7 +40,6 @@ class TestDecisionTransformer:
         assert torch.allclose(probs.sum(), torch.tensor(1.0), atol=1e-5)
 
     def test_get_action(self, model):
-        import numpy as np
         states = [torch.randint(0, 10, (317,)) for _ in range(3)]
         actions = [0, 5]
         returns_to_go = [1.0, 0.8, 0.6]

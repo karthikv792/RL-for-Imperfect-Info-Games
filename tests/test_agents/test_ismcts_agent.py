@@ -1,7 +1,5 @@
 # tests/test_agents/test_ismcts_agent.py
-import pytest
 from unittest.mock import MagicMock
-import numpy as np
 import torch
 from engine.game_state import GameState
 from agents.ismcts.agent import ISMCTSAgent

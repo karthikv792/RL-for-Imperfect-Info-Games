@@ -50,7 +50,7 @@ class SpectatorManager:
         a1_cls = SPECTATOR_AGENTS.get(agent1_name)
         a2_cls = SPECTATOR_AGENTS.get(agent2_name)
         if not a1_cls or not a2_cls:
-            raise ValueError(f"Unknown agent")
+            raise ValueError("Unknown agent")
         a1 = a1_cls(name=agent1_name, seed=seed) if agent1_name == "random" else a1_cls(name=agent1_name)
         a2 = a2_cls(name=agent2_name, seed=(seed or 0) + 1) if agent2_name == "random" else a2_cls(name=agent2_name)
         match = SpectatorMatch(a1, a2, seed=seed)

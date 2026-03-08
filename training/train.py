@@ -4,7 +4,6 @@ from __future__ import annotations
 import argparse
 import os
 import yaml
-import numpy as np
 import torch
 
 from models.vit_policy_value import ViTPolicyValue

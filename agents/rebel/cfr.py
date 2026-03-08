@@ -2,7 +2,7 @@ from __future__ import annotations
 import numpy as np
 from typing import Callable
 from engine.game_state import GameState
-from engine.actions import Action, action_to_index
+from engine.actions import action_to_index
 
 
 class CFRNode:

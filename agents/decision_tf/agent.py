@@ -1,6 +1,5 @@
 from __future__ import annotations
 import os
-import numpy as np
 import torch
 from agents.base import Agent
 from engine.game_state import GameState, InformationSet

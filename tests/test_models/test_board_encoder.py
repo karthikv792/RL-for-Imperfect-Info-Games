@@ -1,7 +1,6 @@
 # tests/test_models/test_board_encoder.py
 import numpy as np
 import torch
-import pytest
 from engine.game_state import GameState
 from models.board_encoder import BoardEncoder
 

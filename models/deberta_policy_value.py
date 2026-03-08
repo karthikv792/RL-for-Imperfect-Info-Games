@@ -1,7 +1,7 @@
 from __future__ import annotations
 import torch
 import torch.nn as nn
-from transformers import DebertaV2Model, DebertaV2Config
+from transformers import DebertaV2Model
 from models.board_tokenizer import SUIT_VOCAB, RANK_VOCAB, OCCUPANT_VOCAB, METADATA_VOCAB
 
 

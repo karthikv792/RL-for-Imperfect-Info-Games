@@ -1,7 +1,6 @@
 # tests/test_agents/test_ismcts.py
 import numpy as np
-import pytest
-from engine.game_state import GameState, InformationSet
+from engine.game_state import GameState
 from agents.ismcts.ismcts import ismcts_search, determinize
 
 
@@ -39,7 +38,7 @@ class TestDeterminize:
             + len(det.discard_pile)
         )
         from engine.deck import SEQUENCE_DECK
-        from engine.board import BOARD_LAYOUT, Occupant
+        from engine.board import Occupant
         placed = 0
         for r in range(10):
             for c in range(10):

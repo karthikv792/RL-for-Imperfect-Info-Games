@@ -1,6 +1,4 @@
 # tests/test_training/test_self_play.py
-import numpy as np
-import pytest
 from unittest.mock import MagicMock
 import torch
 from training.self_play import run_self_play_game, SelfPlayConfig

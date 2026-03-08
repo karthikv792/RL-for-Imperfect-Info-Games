@@ -1,5 +1,4 @@
 # tests/test_api/test_new_agents.py
-import pytest
 from api.game_session import GameSessionManager
 
 

@@ -1,5 +1,4 @@
 # tests/test_training/test_elo.py
-import pytest
 from training.elo import EloRating
 
 

@@ -1,5 +1,4 @@
 # tests/test_api/test_spectator.py
-import pytest
 from api.spectator import SpectatorManager
 
 

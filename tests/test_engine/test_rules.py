@@ -1,7 +1,5 @@
-import numpy as np
-import pytest
-from engine.board import Occupant, CORNERS, BOARD_LAYOUT
-from engine.actions import Action, ActionType
+from engine.board import Occupant, CORNERS
+from engine.actions import ActionType
 from engine.deck import Card
 from engine.rules import (
     find_sequences,

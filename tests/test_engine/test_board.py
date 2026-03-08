@@ -1,5 +1,3 @@
-import numpy as np
-import pytest
 from engine.board import BOARD_LAYOUT, CORNERS, Occupant
 
 

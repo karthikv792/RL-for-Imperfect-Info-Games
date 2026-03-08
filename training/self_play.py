@@ -6,7 +6,6 @@ import torch
 from engine.game_state import GameState
 from engine.actions import action_to_index
 from models.board_encoder import BoardEncoder
-from agents.ismcts.ismcts import ismcts_search
 
 
 @dataclass

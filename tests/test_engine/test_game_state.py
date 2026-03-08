@@ -1,8 +1,6 @@
 import numpy as np
-import pytest
 from engine.game_state import GameState
-from engine.actions import Action, ActionType
-from engine.deck import Card
+from engine.actions import ActionType
 from engine.board import Occupant
 
 

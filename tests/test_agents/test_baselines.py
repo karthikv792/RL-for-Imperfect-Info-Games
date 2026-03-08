@@ -1,5 +1,4 @@
 # tests/test_agents/test_baselines.py
-import pytest
 from engine.game_state import GameState
 from agents.base import Agent
 from agents.random_agent import RandomAgent

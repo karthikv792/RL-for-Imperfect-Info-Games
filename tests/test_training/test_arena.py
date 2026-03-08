@@ -1,5 +1,4 @@
 # tests/test_training/test_arena.py
-import pytest
 from agents.random_agent import RandomAgent
 from training.arena import Arena
 

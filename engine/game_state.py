@@ -3,7 +3,7 @@ from dataclasses import dataclass
 from typing import Optional
 import numpy as np
 
-from engine.board import BOARD_LAYOUT, CORNERS, Occupant
+from engine.board import BOARD_LAYOUT, Occupant
 from engine.deck import Card, Deck
 from engine.actions import Action, ActionType
 from engine.rules import (

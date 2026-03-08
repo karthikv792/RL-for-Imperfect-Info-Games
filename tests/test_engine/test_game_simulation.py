@@ -1,7 +1,5 @@
 # tests/test_engine/test_game_simulation.py
-import pytest
 from engine.game_state import GameState
-from engine.actions import ActionType
 import random
 
 

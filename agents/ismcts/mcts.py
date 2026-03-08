@@ -4,7 +4,7 @@ import math
 import numpy as np
 from typing import Callable, Optional
 from engine.game_state import GameState
-from engine.actions import Action, action_to_index, index_to_action
+from engine.actions import Action, action_to_index
 
 
 class MCTSNode:

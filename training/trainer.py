@@ -1,11 +1,10 @@
 # training/trainer.py
 from __future__ import annotations
-from dataclasses import dataclass, field
+from dataclasses import dataclass
 import numpy as np
 import torch
 import torch.nn as nn
 import torch.optim as optim
-from typing import Optional
 import yaml
 
 
