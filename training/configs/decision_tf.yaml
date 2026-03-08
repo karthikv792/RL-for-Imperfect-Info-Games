@@ -1,0 +1,35 @@
+model:
+  type: decision_transformer
+  state_dim: 317
+  action_dim: 300
+  max_timestep: 500
+  context_length: 20
+  hidden_size: 256
+  n_layer: 6
+  n_head: 8
+  dropout: 0.1
+
+training:
+  learning_rate: 1.0e-4
+  weight_decay: 0.01
+  batch_size: 64
+  num_epochs: 100
+  gradient_accumulation_steps: 4
+  warmup_steps: 1000
+  max_grad_norm: 1.0
+  save_every_epochs: 10
+  checkpoint_dir: checkpoints/decision_tf
+
+self_play:
+  num_games_per_iteration: 500
+  num_iterations: 50
+  target_return: 1.0
+
+arena:
+  num_eval_games: 100
+  promotion_threshold: 0.55
+
+monitoring:
+  wandb_project: sequence-ai
+  wandb_run_name: decision-tf-v1
+  log_every_steps: 50

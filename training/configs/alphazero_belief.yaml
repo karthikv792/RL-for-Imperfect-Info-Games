@@ -1,0 +1,39 @@
+model:
+  type: alphazero_belief
+  backbone: google/vit-base-patch16-224
+  num_channels: 22
+  action_dim: 300
+
+search:
+  num_simulations: 200
+  num_determinizations: 20
+  cpuct: 1.5
+  temperature: 1.0
+  temperature_drop_move: 30
+  dirichlet_alpha: 0.3
+  dirichlet_epsilon: 0.25
+
+training:
+  learning_rate: 2.0e-4
+  weight_decay: 0.01
+  batch_size: 32
+  num_epochs: 100
+  gradient_accumulation_steps: 8
+  warmup_steps: 500
+  max_grad_norm: 1.0
+  save_every_epochs: 5
+  checkpoint_dir: checkpoints/alphazero_belief
+
+self_play:
+  num_games_per_iteration: 200
+  num_iterations: 100
+  buffer_size: 100000
+
+arena:
+  num_eval_games: 50
+  promotion_threshold: 0.55
+
+monitoring:
+  wandb_project: sequence-ai
+  wandb_run_name: alphazero-belief-v1
+  log_every_steps: 25
