@@ -3,10 +3,12 @@ from fastapi import APIRouter, HTTPException
 from pydantic import BaseModel
 from api.game_session import GameSessionManager
 from api.leaderboard import LeaderboardManager
+from api.model_registry import ModelRegistry
 
 router = APIRouter()
 manager = GameSessionManager()
 leaderboard_manager = LeaderboardManager()
+model_registry = ModelRegistry()
 
 
 class CreateGameRequest(BaseModel):
@@ -22,11 +24,13 @@ class MakeMoveRequest(BaseModel):
 
 @router.get("/agents")
 def list_agents():
+    """List all available AI agents."""
     return {"agents": manager.list_agents()}
 
 
 @router.post("/game")
 def create_game(req: CreateGameRequest):
+    """Create a new game session against an AI agent."""
     try:
         sid = manager.create_session(
             agent_name=req.agent,
@@ -41,6 +45,7 @@ def create_game(req: CreateGameRequest):
 
 @router.get("/game/{session_id}")
 def get_game_state(session_id: str):
+    """Retrieve the current state of a game session."""
     session = manager.get_session(session_id)
     if session is None:
         raise HTTPException(status_code=404, detail="Game not found")
@@ -49,6 +54,7 @@ def get_game_state(session_id: str):
 
 @router.post("/game/{session_id}/move")
 def make_move(session_id: str, req: MakeMoveRequest):
+    """Submit a human move and receive the AI agent's response move."""
     session = manager.get_session(session_id)
     if session is None:
         raise HTTPException(status_code=404, detail="Game not found")
@@ -61,6 +67,13 @@ def make_move(session_id: str, req: MakeMoveRequest):
     return response
 
 
+@router.get("/models")
+def list_models():
+    """List all registered models and their metadata."""
+    return {"models": model_registry.list_models()}
+
+
 @router.get("/leaderboard")
 def get_leaderboard():
+    """Retrieve the current agent leaderboard rankings."""
     return {"leaderboard": leaderboard_manager.get_leaderboard()}
