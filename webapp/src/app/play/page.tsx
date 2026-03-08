@@ -114,6 +114,13 @@ function PlayContent() {
         </div>
       </div>
 
+      {/* Screen reader announcements */}
+      <div className="sr-only" aria-live="assertive" role="status">
+        {gameState?.is_over
+          ? `Game over. ${gameState.winner === 1 ? "You win!" : gameState.winner === 2 ? "AI wins!" : "Draw."}`
+          : gameState?.turn === "human" ? "Your turn" : "AI is thinking"}
+      </div>
+
       {/* Game Over Overlay */}
       {gameState.is_over && (
         <div className="fixed inset-0 bg-black/60 flex items-center justify-center z-50">

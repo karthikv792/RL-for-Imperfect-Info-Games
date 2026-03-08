@@ -21,6 +21,13 @@ export function BoardCell({
   const suitSymbol: Record<string, string> = { S: "\u2660", H: "\u2665", D: "\u2666", C: "\u2663" };
   const suitColor = suit === "H" || suit === "D" ? "text-red-600" : "text-gray-900";
 
+  const suitNames: Record<string, string> = { S: "Spades", H: "Hearts", D: "Diamonds", C: "Clubs" };
+  const occupantLabel = occupant === 0 ? "empty" : occupant === 1 ? "Gold token" : occupant === 2 ? "Blue token" : "corner";
+  const legalLabel = isLegal ? ", legal move available" : "";
+  const ariaLabel = isCorner
+    ? "Corner cell, free space"
+    : `${rank} of ${suitNames[suit] || suit}, ${occupantLabel}${legalLabel}`;
+
   return (
     <div
       className={`relative aspect-square rounded-sm border transition-all duration-150
@@ -28,7 +35,11 @@ export function BoardCell({
         ${isLegal ? "cursor-pointer ring-2 ring-green-400/40 hover:ring-green-400/70 hover:scale-[1.02]" : ""}
         ${isLastMove ? "ring-2 ring-amber-400/50" : ""}
       `}
+      role="gridcell"
+      aria-label={ariaLabel}
+      tabIndex={isLegal ? 0 : -1}
       onClick={isLegal ? onClick : undefined}
+      onKeyDown={isLegal ? (e) => { if (e.key === "Enter" || e.key === " ") { e.preventDefault(); onClick?.(); } } : undefined}
     >
       {!isCorner && (
         <>

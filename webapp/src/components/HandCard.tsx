@@ -13,10 +13,15 @@ export function HandCard({ card, isSelected, isPlayable, onClick }: HandCardProp
   const suitSymbol: Record<string, string> = { S: "\u2660", H: "\u2665", D: "\u2666", C: "\u2663" };
   const suitColor = suit === "H" || suit === "D" ? "text-red-600" : "text-gray-900";
 
+  const suitNames: Record<string, string> = { S: "Spades", H: "Hearts", D: "Diamonds", C: "Clubs" };
+  const ariaLabel = `${rank} of ${suitNames[suit] || suit}${isSelected ? ", selected" : ""}${!isPlayable ? ", not playable" : ""}`;
+
   return (
     <button
       onClick={onClick}
       disabled={!isPlayable}
+      aria-label={ariaLabel}
+      aria-pressed={isSelected}
       className={`relative w-16 h-24 rounded-lg border-2 transition-all duration-200 bg-white
         ${isSelected ? "border-amber-500 -translate-y-3 shadow-lg shadow-amber-500/20" : "border-gray-300"}
         ${isPlayable ? "hover:-translate-y-1 hover:shadow-md cursor-pointer" : "opacity-50 cursor-not-allowed"}

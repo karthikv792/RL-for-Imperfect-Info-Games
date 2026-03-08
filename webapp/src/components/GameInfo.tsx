@@ -19,7 +19,7 @@ export function GameInfo({ turn, currentPlayer, sequences, deckSize, aiThinking,
       <h2 className="text-lg font-semibold text-[var(--text-primary)]">Game Info</h2>
 
       {/* Turn indicator */}
-      <div className="space-y-1">
+      <div className="space-y-1" aria-live="polite">
         <div className="text-sm text-[var(--text-muted)]">Turn</div>
         <div className={`text-sm font-medium ${turn === "human" ? "text-green-400" : "text-amber-400"}`}>
           {aiThinking ? (
