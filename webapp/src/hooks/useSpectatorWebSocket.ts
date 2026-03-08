@@ -19,13 +19,28 @@ export function useSpectatorWebSocket(wsUrl: string) {
   const [state, setState] = useState<SpectatorState | null>(null);
   const [isConnected, setIsConnected] = useState(false);
   const [matchId, setMatchId] = useState<string | null>(null);
+  const [reconnectAttempt, setReconnectAttempt] = useState(0);
+  const reconnectTimer = useRef<NodeJS.Timeout | null>(null);
+  const maxReconnectDelay = 30000;
 
-  useEffect(() => {
+  const connect = useCallback(() => {
     const socket = new WebSocket(wsUrl);
     ws.current = socket;
 
-    socket.onopen = () => setIsConnected(true);
-    socket.onclose = () => setIsConnected(false);
+    socket.onopen = () => {
+      setIsConnected(true);
+      setReconnectAttempt(0);
+    };
+
+    socket.onclose = () => {
+      setIsConnected(false);
+      // Schedule reconnect with exponential backoff
+      const delay = Math.min(1000 * Math.pow(2, reconnectAttempt), maxReconnectDelay);
+      reconnectTimer.current = setTimeout(() => {
+        setReconnectAttempt(prev => prev + 1);
+        connect();
+      }, delay);
+    };
 
     socket.onmessage = (event) => {
       const data = JSON.parse(event.data);
@@ -41,9 +56,18 @@ export function useSpectatorWebSocket(wsUrl: string) {
         });
       }
     };
+  }, [wsUrl, reconnectAttempt]);
 
-    return () => socket.close();
-  }, [wsUrl]);
+  useEffect(() => {
+    connect();
+
+    return () => {
+      if (reconnectTimer.current) {
+        clearTimeout(reconnectTimer.current);
+      }
+      ws.current?.close();
+    };
+  }, [connect]);
 
   const startMatch = useCallback((agent1: string, agent2: string, seed?: number) => {
     ws.current?.send(JSON.stringify({ type: "spectate_start", agent1, agent2, seed }));
@@ -55,5 +79,5 @@ export function useSpectatorWebSocket(wsUrl: string) {
     }
   }, [matchId]);
 
-  return { state, isConnected, matchId, startMatch, advance };
+  return { state, isConnected, matchId, reconnectAttempt, startMatch, advance };
 }

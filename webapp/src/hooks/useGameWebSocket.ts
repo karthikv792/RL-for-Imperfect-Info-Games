@@ -8,13 +8,28 @@ export function useGameWebSocket(wsUrl: string) {
   const [isConnected, setIsConnected] = useState(false);
   const [aiThinking, setAiThinking] = useState(false);
   const [lastAgentMove, setLastAgentMove] = useState<AgentMove | null>(null);
+  const [reconnectAttempt, setReconnectAttempt] = useState(0);
+  const reconnectTimer = useRef<NodeJS.Timeout | null>(null);
+  const maxReconnectDelay = 30000;
 
-  useEffect(() => {
+  const connect = useCallback(() => {
     const socket = new WebSocket(wsUrl);
     ws.current = socket;
 
-    socket.onopen = () => setIsConnected(true);
-    socket.onclose = () => setIsConnected(false);
+    socket.onopen = () => {
+      setIsConnected(true);
+      setReconnectAttempt(0);
+    };
+
+    socket.onclose = () => {
+      setIsConnected(false);
+      // Schedule reconnect with exponential backoff
+      const delay = Math.min(1000 * Math.pow(2, reconnectAttempt), maxReconnectDelay);
+      reconnectTimer.current = setTimeout(() => {
+        setReconnectAttempt(prev => prev + 1);
+        connect();
+      }, delay);
+    };
 
     socket.onmessage = (event) => {
       const data = JSON.parse(event.data);
@@ -28,9 +43,18 @@ export function useGameWebSocket(wsUrl: string) {
         setAiThinking(false);
       }
     };
+  }, [wsUrl, reconnectAttempt]);
 
-    return () => socket.close();
-  }, [wsUrl]);
+  useEffect(() => {
+    connect();
+
+    return () => {
+      if (reconnectTimer.current) {
+        clearTimeout(reconnectTimer.current);
+      }
+      ws.current?.close();
+    };
+  }, [connect]);
 
   const newGame = useCallback((agent: string, seed?: number) => {
     ws.current?.send(JSON.stringify({ type: "new_game", agent, seed }));
@@ -43,5 +67,5 @@ export function useGameWebSocket(wsUrl: string) {
     setAiThinking(true);
   }, []);
 
-  return { gameState, isConnected, aiThinking, lastAgentMove, newGame, makeMove };
+  return { gameState, isConnected, aiThinking, lastAgentMove, reconnectAttempt, newGame, makeMove };
 }
