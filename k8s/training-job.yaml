@@ -1,0 +1,55 @@
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: sequence-ai-training
+  labels:
+    app: sequence-ai
+    component: training
+spec:
+  backoffLimit: 3
+  template:
+    metadata:
+      labels:
+        app: sequence-ai
+        component: training
+    spec:
+      restartPolicy: OnFailure
+      containers:
+        - name: trainer
+          image: sequence-ai:latest
+          command: ["python", "-m", "training.train"]
+          args:
+            - "--config"
+            - "/etc/sequence-ai/rebel_deberta.yaml"
+          resources:
+            requests:
+              cpu: "2"
+              memory: 8Gi
+              nvidia.com/gpu: 1
+            limits:
+              cpu: "4"
+              memory: 16Gi
+              nvidia.com/gpu: 1
+          volumeMounts:
+            - name: data-volume
+              mountPath: /data
+            - name: training-config
+              mountPath: /etc/sequence-ai
+          env:
+            - name: WANDB_API_KEY
+              valueFrom:
+                secretKeyRef:
+                  name: sequence-ai-secrets
+                  key: wandb-api-key
+                  optional: true
+            - name: CHECKPOINT_DIR
+              value: /data/checkpoints
+            - name: BUFFER_DIR
+              value: /data/buffer
+      volumes:
+        - name: data-volume
+          persistentVolumeClaim:
+            claimName: sequence-ai-data
+        - name: training-config
+          configMap:
+            name: sequence-ai-training-config

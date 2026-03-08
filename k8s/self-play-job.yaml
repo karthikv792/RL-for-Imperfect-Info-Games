@@ -1,0 +1,49 @@
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: sequence-ai-self-play
+  labels:
+    app: sequence-ai
+    component: self-play
+spec:
+  parallelism: 4
+  completions: 100
+  backoffLimit: 5
+  template:
+    metadata:
+      labels:
+        app: sequence-ai
+        component: self-play
+    spec:
+      restartPolicy: OnFailure
+      containers:
+        - name: self-play
+          image: sequence-ai:latest
+          command: ["python", "-m", "training.self_play"]
+          args:
+            - "--config"
+            - "/etc/sequence-ai/rebel_deberta.yaml"
+          resources:
+            requests:
+              cpu: "1"
+              memory: 2Gi
+            limits:
+              cpu: "2"
+              memory: 4Gi
+          volumeMounts:
+            - name: data-volume
+              mountPath: /data
+            - name: training-config
+              mountPath: /etc/sequence-ai
+          env:
+            - name: CHECKPOINT_DIR
+              value: /data/checkpoints
+            - name: BUFFER_DIR
+              value: /data/buffer
+      volumes:
+        - name: data-volume
+          persistentVolumeClaim:
+            claimName: sequence-ai-data
+        - name: training-config
+          configMap:
+            name: sequence-ai-training-config

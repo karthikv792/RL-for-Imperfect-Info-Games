@@ -1,0 +1,47 @@
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: sequence-ai-arena
+  labels:
+    app: sequence-ai
+    component: arena
+spec:
+  backoffLimit: 0
+  template:
+    metadata:
+      labels:
+        app: sequence-ai
+        component: arena
+    spec:
+      restartPolicy: Never
+      containers:
+        - name: arena
+          image: sequence-ai:latest
+          command: ["python", "-m", "training.arena"]
+          args:
+            - "--config"
+            - "/etc/sequence-ai/rebel_deberta.yaml"
+          resources:
+            requests:
+              cpu: "2"
+              memory: 4Gi
+            limits:
+              cpu: "4"
+              memory: 8Gi
+          volumeMounts:
+            - name: data-volume
+              mountPath: /data
+            - name: training-config
+              mountPath: /etc/sequence-ai
+          env:
+            - name: CHECKPOINT_DIR
+              value: /data/checkpoints
+            - name: BUFFER_DIR
+              value: /data/buffer
+      volumes:
+        - name: data-volume
+          persistentVolumeClaim:
+            claimName: sequence-ai-data
+        - name: training-config
+          configMap:
+            name: sequence-ai-training-config
