@@ -2,9 +2,11 @@ from __future__ import annotations
 from fastapi import APIRouter, HTTPException
 from pydantic import BaseModel
 from api.game_session import GameSessionManager
+from api.leaderboard import LeaderboardManager
 
 router = APIRouter()
 manager = GameSessionManager()
+leaderboard_manager = LeaderboardManager()
 
 
 class CreateGameRequest(BaseModel):
@@ -61,9 +63,4 @@ def make_move(session_id: str, req: MakeMoveRequest):
 
 @router.get("/leaderboard")
 def get_leaderboard():
-    from training.elo import EloRating
-    try:
-        elo = EloRating.load("data/elo_ratings.json")
-        return {"leaderboard": elo.leaderboard()}
-    except FileNotFoundError:
-        return {"leaderboard": []}
+    return {"leaderboard": leaderboard_manager.get_leaderboard()}
