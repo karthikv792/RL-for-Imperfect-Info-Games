@@ -56,12 +56,18 @@ export default function Home() {
           Start Playing
         </button>
 
-        <div className="mt-8">
+        <div className="mt-8 flex flex-col items-center gap-2">
           <button
             onClick={() => router.push("/spectate")}
             className="text-[var(--text-muted)] hover:text-[var(--text-secondary)] transition-colors text-sm"
           >
             or watch AI vs AI →
+          </button>
+          <button
+            onClick={() => router.push("/leaderboard")}
+            className="text-[var(--text-muted)] hover:text-[var(--text-secondary)] transition-colors text-sm"
+          >
+            View Leaderboard →
           </button>
         </div>
       </div>
