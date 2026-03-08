@@ -7,11 +7,15 @@ from engine.board import BOARD_LAYOUT, Occupant
 from agents.base import Agent
 from agents.random_agent import RandomAgent
 from agents.heuristic_agent import HeuristicAgent
+from agents.decision_tf.agent import DecisionTFAgent
+from agents.alphazero_belief.agent import AlphaZeroBeliefAgent
 
 
 AVAILABLE_AGENTS: dict[str, type] = {
     "random": RandomAgent,
     "heuristic": HeuristicAgent,
+    "decision_tf": DecisionTFAgent,
+    "alphazero_belief": AlphaZeroBeliefAgent,
 }
 
 
