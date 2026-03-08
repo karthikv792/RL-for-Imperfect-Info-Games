@@ -35,7 +35,7 @@ export function Board({ board, legalMoves, lastMove, sequences, onCellClick }: B
   }
 
   return (
-    <div className="bg-[var(--surface-board)] p-3 rounded-xl shadow-2xl">
+    <div className="w-full max-w-[min(90vw,500px)] bg-[var(--surface-board)] p-3 rounded-xl shadow-2xl">
       <div className="grid grid-cols-10 gap-0.5">
         {board.map((row, r) =>
           row.map((cell, c) => (

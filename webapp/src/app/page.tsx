@@ -24,7 +24,7 @@ export default function Home() {
 
         <div className="mb-8">
           <h2 className="text-lg font-semibold mb-4 text-[var(--text-secondary)]">Choose Your Opponent</h2>
-          <div className="grid grid-cols-2 gap-4 max-w-md mx-auto">
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 max-w-md mx-auto">
             {AGENTS.map((agent) => (
               <button
                 key={agent.id}

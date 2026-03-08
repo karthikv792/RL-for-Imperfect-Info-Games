@@ -81,9 +81,9 @@ function PlayContent() {
       </div>
 
       {/* Main layout */}
-      <div className="flex gap-6 w-full max-w-5xl justify-center">
+      <div className="flex flex-col lg:flex-row gap-6 w-full max-w-5xl justify-center items-center lg:items-start">
         {/* Left: Board + Hand */}
-        <div className="flex flex-col items-center gap-4">
+        <div className="flex flex-col items-center gap-4 w-full lg:w-auto">
           <Board
             board={gameState.board}
             legalMoves={gameState.legal_moves}
@@ -100,7 +100,7 @@ function PlayContent() {
         </div>
 
         {/* Right: Info + History */}
-        <div className="flex flex-col gap-4 min-w-[220px]">
+        <div className="flex flex-col gap-4 w-full lg:w-auto lg:min-w-[220px]">
           <GameInfo
             turn={gameState.turn}
             currentPlayer={gameState.current_player}

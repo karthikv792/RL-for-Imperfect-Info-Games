@@ -10,7 +10,7 @@ interface HandProps {
 
 export function Hand({ cards, selectedCard, playableCards, onSelectCard }: HandProps) {
   return (
-    <div className="flex gap-2 justify-center py-4">
+    <div className="flex gap-2 justify-center py-4 overflow-x-auto px-2">
       {cards.map((card, i) => (
         <HandCard
           key={`${card}-${i}`}

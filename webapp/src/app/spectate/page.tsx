@@ -78,7 +78,7 @@ export default function SpectatePage() {
       ) : (
         <div className="flex flex-col items-center gap-6">
           {/* Controls */}
-          <div className="flex items-center gap-4">
+          <div className="flex flex-wrap items-center justify-center gap-4">
             <button onClick={() => setIsPlaying(!isPlaying)}
               className="px-4 py-2 bg-[var(--bg-card)] rounded-lg text-[var(--text-primary)] border border-gray-700 hover:border-gray-500">
               {isPlaying ? "Pause" : "Play"}
