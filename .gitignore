@@ -1,0 +1,38 @@
+# Python
+__pycache__/
+*.pyc
+*.pyo
+*.egg-info/
+dist/
+build/
+.eggs/
+*.egg
+
+# PyTorch models
+*.pt
+*.pth
+checkpoints/
+
+# Weights & Biases
+wandb/
+
+# Environment
+.env
+.venv/
+venv/
+
+# IDE
+.vscode/
+.idea/
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Node
+webapp/node_modules/
+webapp/.next/
+webapp/out/
+
+# Docker
+.docker/
