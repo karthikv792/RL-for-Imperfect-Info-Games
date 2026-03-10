@@ -8,25 +8,28 @@ export function useGameWebSocket(wsUrl: string) {
   const [isConnected, setIsConnected] = useState(false);
   const [aiThinking, setAiThinking] = useState(false);
   const [lastAgentMove, setLastAgentMove] = useState<AgentMove | null>(null);
-  const [reconnectAttempt, setReconnectAttempt] = useState(0);
+  const reconnectAttemptRef = useRef(0);
   const reconnectTimer = useRef<NodeJS.Timeout | null>(null);
   const maxReconnectDelay = 30000;
+  const closedIntentionally = useRef(false);
 
   const connect = useCallback(() => {
+    if (ws.current && ws.current.readyState === WebSocket.OPEN) return;
+
     const socket = new WebSocket(wsUrl);
     ws.current = socket;
 
     socket.onopen = () => {
       setIsConnected(true);
-      setReconnectAttempt(0);
+      reconnectAttemptRef.current = 0;
     };
 
     socket.onclose = () => {
       setIsConnected(false);
-      // Schedule reconnect with exponential backoff
-      const delay = Math.min(1000 * Math.pow(2, reconnectAttempt), maxReconnectDelay);
+      if (closedIntentionally.current) return;
+      const delay = Math.min(1000 * Math.pow(2, reconnectAttemptRef.current), maxReconnectDelay);
+      reconnectAttemptRef.current += 1;
       reconnectTimer.current = setTimeout(() => {
-        setReconnectAttempt(prev => prev + 1);
         connect();
       }, delay);
     };
@@ -43,12 +46,14 @@ export function useGameWebSocket(wsUrl: string) {
         setAiThinking(false);
       }
     };
-  }, [wsUrl, reconnectAttempt]);
+  }, [wsUrl]);
 
   useEffect(() => {
+    closedIntentionally.current = false;
     connect();
 
     return () => {
+      closedIntentionally.current = true;
       if (reconnectTimer.current) {
         clearTimeout(reconnectTimer.current);
       }
@@ -67,5 +72,5 @@ export function useGameWebSocket(wsUrl: string) {
     setAiThinking(true);
   }, []);
 
-  return { gameState, isConnected, aiThinking, lastAgentMove, reconnectAttempt, newGame, makeMove };
+  return { gameState, isConnected, aiThinking, lastAgentMove, newGame, makeMove };
 }
