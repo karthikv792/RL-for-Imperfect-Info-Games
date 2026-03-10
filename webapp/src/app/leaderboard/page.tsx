@@ -24,7 +24,7 @@ export default function LeaderboardPage() {
     fetch(apiUrl)
       .then(res => res.json())
       .then(data => {
-        setStats(data);
+        setStats(data.leaderboard || []);
         setLoading(false);
       })
       .catch(() => setLoading(false));
